@@ -439,17 +439,45 @@ async def my_deals(call: CallbackQuery):
         await send_banner(call, t.MY_DEALS_EMPTY, kb.back_button())
         return
 
+    uid = call.from_user.id
     rows = []
     for d in deals[:10]:
-        status = t.DEAL_STATUSES.get(d["status"], d["status"])
-        role   = "🛒" if d.get("buyer_id") == call.from_user.id else "💼"
+        role_icon = "🛒" if d["buyer_id"] == uid else "💼"
+        status_label = {
+            "pending":         "🟡 Ожидает",
+            "waiting_payment": "🔵 Ожидает оплаты",
+            "checking":        "🟠 Проверка",
+            "paid":            "🟢 Оплачено",
+            "delivering":      "📦 Передача",
+            "completed":       "✅ Завершена",
+            "cancelled":       "⚫ Отменена",
+            "disputed":        "🔴 Спор",
+        }.get(d["status"], d["status"])
         rows.append([InlineKeyboardButton(
-            text=f"{role} #{d['deal_id']} — {d['status'].upper()}",
+            text=f"{role_icon} #{d['deal_id']} — {status_label}",
             callback_data=f"deal_view_{d['deal_id']}"
         )])
     rows.append([InlineKeyboardButton(text="◀️ Назад в меню", callback_data="back_main")])
 
-    await send_banner(call, t.MY_DEALS_LIST, InlineKeyboardMarkup(inline_keyboard=rows))
+    # Считаем статистику
+    total   = len(deals)
+    done    = sum(1 for d in deals if d["status"] == "completed")
+    active  = sum(1 for d in deals if d["status"] in ("pending","waiting_payment","checking","paid","delivering"))
+    cancelled = sum(1 for d in deals if d["status"] == "cancelled")
+
+    text = (
+        "🔥 <b>Lolz Team Bot</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        "📋 <b>Мои сделки</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"📊 <b>Всего сделок:</b> <b>{total}</b>\n"
+        f"✅ <b>Завершено:</b> <b>{done}</b>\n"
+        f"⏳ <b>Активных:</b> <b>{active}</b>\n"
+        f"⚫ <b>Отменено:</b> <b>{cancelled}</b>\n\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        "💼 <b>Выберите сделку для просмотра:</b>"
+    )
+    await send_banner(call, text, InlineKeyboardMarkup(inline_keyboard=rows))
 
 @router.callback_query(F.data.startswith("deal_view_"))
 async def deal_view(call: CallbackQuery):
@@ -459,21 +487,38 @@ async def deal_view(call: CallbackQuery):
         await call.answer("❌ Сделка не найдена", show_alert=True)
         return
 
-    role = "🛒 <b>Покупатель</b>" if deal.get("buyer_id") == call.from_user.id else "💼 <b>Продавец</b>"
-    prod_data = json.loads(deal["product_data"]) if deal["product_data"] else {}
-    info_str  = format_product_info(deal["product_type"], prod_data)
-    status_str = t.DEAL_STATUSES.get(deal["status"], deal["status"])
-    role_key = "buyer" if deal.get("buyer_id") == call.from_user.id else "seller"
+    uid      = call.from_user.id
+    is_buyer = deal["buyer_id"] == uid
+    role     = "🛒 <b>Покупатель</b>" if is_buyer else "💼 <b>Продавец</b>"
+    role_key = "buyer" if is_buyer else "seller"
 
-    await send_banner(call,
-        t.DEAL_VIEW.format(
-            deal_id=deal["deal_id"],
-            product_type=PRODUCT_TYPES.get(deal["product_type"], deal["product_type"]),
-            product_info=info_str,
-            amount=deal["amount"], currency=deal["currency"], fee=deal["fee"],
-            status=status_str,
-            created_at=deal["created_at"][:10],
-            role=role,
-        ),
-        kb.deal_view_kb(deal_id, role_key, deal["status"])
+    prod_data  = json.loads(deal["product_data"]) if deal["product_data"] else {}
+    info_str   = format_product_info(deal["product_type"], prod_data)
+    status_str = t.DEAL_STATUSES.get(deal["status"], deal["status"])
+    total      = round(deal["amount"] + deal["fee"], 4)
+
+    # Получаем имена участников
+    seller = db.get_user(deal["seller_id"])
+    buyer  = db.get_user(deal["buyer_id"]) if deal["buyer_id"] else None
+    seller_name = (f"@{seller['username']} (<code>{deal['seller_id']}</code>)" if seller and seller["username"] else f"<code>{deal['seller_id']}</code>")
+    buyer_name  = (f"@{buyer['username']} (<code>{deal['buyer_id']}</code>)" if buyer and buyer["username"] else ("—" if not deal["buyer_id"] else f"<code>{deal['buyer_id']}</code>"))
+
+    text = (
+        "🔥 <b>Lolz Team Bot</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📋 <b>Сделка</b> <b>#{deal['deal_id']}</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"📦 <b>Тип товара:</b> <b>{PRODUCT_TYPES.get(deal['product_type'], deal['product_type'])}</b>\n"
+        f"{info_str}"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"💰 <b>Сумма продавца:</b> <b>{deal['amount']} {deal['currency']}</b>\n"
+        f"💸 <b>Комиссия (3%):</b> <b>{deal['fee']} {deal['currency']}</b>\n"
+        f"💵 <b>Итого к оплате:</b> <b>{total} {deal['currency']}</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"👤 <b>Продавец:</b> <b>{seller_name}</b>\n"
+        f"🛒 <b>Покупатель:</b> <b>{buyer_name}</b>\n"
+        f"📊 <b>Статус:</b> {status_str}\n"
+        f"📅 <b>Создана:</b> <b>{deal['created_at'][:10]}</b>\n"
+        f"👤 <b>Ваша роль:</b> {role}"
     )
+    await send_banner(call, text, kb.deal_view_kb(deal_id, role_key, deal["status"]))
