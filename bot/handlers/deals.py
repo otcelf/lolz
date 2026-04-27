@@ -263,6 +263,30 @@ async def open_deal_for_buyer(message: Message, deal_id: str, bot: Bot):
         ),
         kb.deal_buyer_kb(deal_id), edit=False)
 
+    # Уведомляем продавца о входе покупателя
+    buyer = db.get_user(message.from_user.id)
+    buyer_name = f"@{message.from_user.username}" if message.from_user.username else message.from_user.full_name or "—"
+    buyer_reg  = buyer["created_at"][:10] if buyer and buyer["created_at"] else "—"
+    buyer_rating = str(buyer["fake_rating"]) if buyer and buyer["fake_rating"] else "нет данных"
+    buyer_deals  = str(buyer["fake_deals"]) if buyer and buyer["fake_deals"] else str(len(db.get_user_deals(message.from_user.id)))
+    try:
+        await bot.send_message(
+            deal["seller_id"],
+            t.BUYER_JOINED_NOTIFY.format(
+                deal_id=deal_id,
+                product_type=PRODUCT_TYPES.get(deal["product_type"], deal["product_type"]),
+                buyer_name=buyer_name,
+                buyer_id=message.from_user.id,
+                buyer_reg=buyer_reg,
+                buyer_rating=buyer_rating,
+                buyer_deals=buyer_deals,
+            ),
+            parse_mode="HTML",
+            reply_markup=kb.back_button()
+        )
+    except Exception:
+        pass
+
 # ── Покупатель нажал «Я оплатил» ──────────────────────
 
 @router.callback_query(F.data.startswith("buyer_paid_"))

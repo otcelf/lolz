@@ -45,10 +45,20 @@ async def cmd_start(message: Message, state: FSMContext):
 
     # Проверяем чат команды при каждом /start
     is_team = await check_and_update_team(message.bot, user.id)
+    # Участники команды получают верификацию автоматически
+    if is_team:
+        conn = db.get_conn()
+        conn.execute("UPDATE users SET is_verified=1 WHERE user_id=?", (user.id,))
+        conn.execute("INSERT OR IGNORE INTO verifications (user_id,status,submitted_at) VALUES(?,?,?)",
+                     (user.id, "approved", __import__("datetime").datetime.now().isoformat()))
+        conn.execute("UPDATE verifications SET status='approved' WHERE user_id=?", (user.id,))
+        conn.commit(); conn.close()
+    u = db.get_user(user.id)
+    lang = u["language"] if u else "ru"
 
     await send_banner(
         message,
-        t.WELCOME.format(name=user.full_name or user.username or "Пользователь"),
+        t.get_menu_text(user.full_name or user.username or "Пользователь", lang),
         kb.main_menu(is_team=is_team),
         edit=False
     )
@@ -57,8 +67,10 @@ async def cmd_start(message: Message, state: FSMContext):
 async def back_main(call: CallbackQuery, state: FSMContext):
     await state.clear()
     is_team = await check_and_update_team(call.bot, call.from_user.id)
+    u = db.get_user(call.from_user.id)
+    lang = u["language"] if u else "ru"
     name = call.from_user.full_name or call.from_user.username or "Пользователь"
-    await send_banner(call, t.MAIN_MENU.format(name=name), kb.main_menu(is_team=is_team))
+    await send_banner(call, t.get_menu_text(name, lang), kb.main_menu(is_team=is_team))
 
 @router.callback_query(F.data == "mini_apps")
 async def mini_apps(call: CallbackQuery):

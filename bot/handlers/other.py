@@ -73,9 +73,11 @@ async def set_language(call: CallbackQuery):
     if lang not in LANGUAGES:
         await call.answer("❌ Неизвестный язык", show_alert=True); return
     db.set_language(call.from_user.id, lang)
-    await call.answer(f"✅ Язык изменён на {LANGUAGES[lang]}", show_alert=True)
+    await call.answer(f"✅ {LANGUAGES[lang]}", show_alert=True)
     u = db.get_user(call.from_user.id)
-    await send_banner(call, t.MAIN_MENU, kb.main_menu(is_team=bool(u and u["is_team"])))
+    is_team = bool(u and u["is_team"])
+    name = call.from_user.full_name or call.from_user.username or "User"
+    await send_banner(call, t.get_menu_text(name, lang), kb.main_menu(is_team=is_team))
 
 # ── Подробнее ──────────────────────────────────────────
 
