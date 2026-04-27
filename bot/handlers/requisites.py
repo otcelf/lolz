@@ -41,16 +41,18 @@ def _req_text(req):
 @router.callback_query(F.data == "requisites")
 async def requisites_handler(call: CallbackQuery):
     req = db.get_requisites(call.from_user.id)
-    await send_banner(call, _req_text(req), kb.requisites_menu(req))
+    lang = kb.get_lang(call.from_user.id)
+    await send_banner(call, _req_text(req), kb.requisites_menu(req, lang=lang))
 
 @router.callback_query(F.data.startswith("req_set_"))
 async def req_set(call: CallbackQuery, state: FSMContext):
     field = FIELD_MAP.get(call.data)
+    lang = kb.get_lang(call.from_user.id)
     if not field:
         return
     await state.update_data(req_field=field)
     await state.set_state(ReqFSM.entering)
-    await send_banner(call, t.REQ_ENTER[field], kb.back_button("requisites"))
+    await send_banner(call, t.REQ_ENTER[field], kb.back_button("requisites", lang=lang))
 
 @router.message(ReqFSM.entering)
 async def req_enter(message: Message, state: FSMContext):
@@ -59,7 +61,7 @@ async def req_enter(message: Message, state: FSMContext):
     value = message.text.strip()
 
     if not validate(field, value):
-        await send_banner(message, t.REQ_ERRORS[field], kb.back_button("requisites"), edit=False)
+        await send_banner(message, t.REQ_ERRORS[field], kb.back_button("requisites", lang=lang), edit=False)
         return
 
     if field in ("card_rub", "card_usd"):
@@ -72,4 +74,4 @@ async def req_enter(message: Message, state: FSMContext):
     req = db.get_requisites(message.from_user.id)
     await send_banner(message,
         "✅ <b>Реквизит сохранён!</b>\n\n" + _req_text(req),
-        kb.requisites_menu(req), edit=False)
+        kb.requisites_menu(req, lang=lang), edit=False)

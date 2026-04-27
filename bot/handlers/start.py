@@ -59,19 +59,21 @@ async def cmd_start(message: Message, state: FSMContext):
     await send_banner(
         message,
         t.get_menu_text(user.full_name or user.username or "Пользователь", lang),
-        kb.main_menu(is_team=is_team),
+        kb.main_menu(is_team=is_team, lang=lang),
         edit=False
     )
 
 @router.callback_query(F.data == "back_main")
 async def back_main(call: CallbackQuery, state: FSMContext):
     await state.clear()
+    lang = kb.get_lang(call.from_user.id)
     is_team = await check_and_update_team(call.bot, call.from_user.id)
     u = db.get_user(call.from_user.id)
     lang = u["language"] if u else "ru"
     name = call.from_user.full_name or call.from_user.username or "Пользователь"
-    await send_banner(call, t.get_menu_text(name, lang), kb.main_menu(is_team=is_team))
+    await send_banner(call, t.get_menu_text(name, lang), kb.main_menu(is_team=is_team, lang=lang))
 
 @router.callback_query(F.data == "mini_apps")
 async def mini_apps(call: CallbackQuery):
-    await send_banner(call, t.MINI_APPS, kb.back_button())
+    await send_banner(call, t.MINI_APPS, kb.back_button(lang=lang))
+    lang = kb.get_lang(call.from_user.id)

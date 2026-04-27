@@ -16,6 +16,7 @@ router = Router()
 @router.callback_query(F.data == "referral")
 async def referral_handler(call: CallbackQuery, bot: Bot):
     u = db.get_user(call.from_user.id)
+    lang = kb.get_lang(call.from_user.id)
     if not u:
         await call.answer("❌ Сначала /start", show_alert=True); return
     bot_info = await bot.get_me()
@@ -27,7 +28,7 @@ async def referral_handler(call: CallbackQuery, bot: Bot):
             count=len(referrals), bot_username=bot_info.username,
             ref_code=u["referral_code"], earned=round(earned, 4),
         ),
-        kb.referral_menu(bot_info.username, u["referral_code"])
+        kb.referral_menu(bot_info.username, u["referral_code"], lang=lang)
     )
 
 # ── Статистика ─────────────────────────────────────────
@@ -35,6 +36,7 @@ async def referral_handler(call: CallbackQuery, bot: Bot):
 @router.callback_query(F.data == "stats")
 async def stats_handler(call: CallbackQuery):
     u = db.get_user(call.from_user.id)
+    lang = kb.get_lang(call.from_user.id)
     if not u:
         await call.answer("❌ Сначала /start", show_alert=True); return
     deals     = db.get_user_deals(call.from_user.id)
@@ -58,14 +60,15 @@ async def stats_handler(call: CallbackQuery):
             disputed=disputed, volume=round(volume, 2),
             referrals=len(referrals), ref_income=round(ref_income, 2),
         ),
-        kb.back_button()
+        kb.back_button(lang=lang)
     )
 
 # ── Язык ───────────────────────────────────────────────
 
 @router.callback_query(F.data == "language")
 async def language_handler(call: CallbackQuery):
-    await send_banner(call, t.LANGUAGE_TEXT, kb.language_menu())
+    await send_banner(call, t.LANGUAGE_TEXT, kb.language_menu(lang=lang))
+    lang = kb.get_lang(call.from_user.id)
 
 @router.callback_query(F.data.startswith("lang_"))
 async def set_language(call: CallbackQuery):
@@ -77,30 +80,32 @@ async def set_language(call: CallbackQuery):
     u = db.get_user(call.from_user.id)
     is_team = bool(u and u["is_team"])
     name = call.from_user.full_name or call.from_user.username or "User"
-    await send_banner(call, t.get_menu_text(name, lang), kb.main_menu(is_team=is_team))
+    await send_banner(call, t.get_menu_text(name, lang), kb.main_menu(is_team=is_team, lang=lang))
 
 # ── Подробнее ──────────────────────────────────────────
 
 @router.callback_query(F.data == "about")
 async def about_handler(call: CallbackQuery):
     s = db.get_global_stats()
+    lang = kb.get_lang(call.from_user.id)
     await send_banner(call,
         t.ABOUT.format(
             total_deals=s["deals"], completed=s["completed"],
             volume=round(s["volume_rub"], 2), support=SUPPORT_USERNAME,
         ),
-        kb.about_menu()
+        kb.about_menu(lang=lang)
     )
 
 @router.callback_query(F.data == "about_stats")
 async def about_stats(call: CallbackQuery):
     s = db.get_global_stats()
+    lang = kb.get_lang(call.from_user.id)
     await send_banner(call,
         t.ABOUT.format(
             total_deals=s["deals"], completed=s["completed"],
             volume=round(s["volume_rub"], 2), support=SUPPORT_USERNAME,
         ),
-        kb.about_menu()
+        kb.about_menu(lang=lang)
     )
 
 # ── Обращения ──────────────────────────────────────────
@@ -110,15 +115,17 @@ class AppealFSM(StatesGroup):
 
 @router.callback_query(F.data == "appeals")
 async def appeals_handler(call: CallbackQuery):
-    await send_banner(call, t.APPEALS, kb.appeals_menu())
+    await send_banner(call, t.APPEALS, kb.appeals_menu(lang=lang))
+    lang = kb.get_lang(call.from_user.id)
 
 @router.callback_query(F.data.startswith("appeal_"))
 async def appeal_type(call: CallbackQuery, state: FSMContext):
     atype = call.data.replace("appeal_", "")
+    lang = kb.get_lang(call.from_user.id)
     if atype not in ("suggest", "complaint"): return
     await state.update_data(appeal_type=atype)
     await state.set_state(AppealFSM.entering)
-    await send_banner(call, t.APPEAL_ENTER[atype], kb.back_button("appeals"))
+    await send_banner(call, t.APPEAL_ENTER[atype], kb.back_button("appeals", lang=lang))
 
 @router.message(AppealFSM.entering)
 async def appeal_text(message: Message, state: FSMContext, bot: Bot):
@@ -126,7 +133,7 @@ async def appeal_text(message: Message, state: FSMContext, bot: Bot):
     atype = data.get("appeal_type", "suggest")
     await state.clear()
     appeal_id = db.create_appeal(message.from_user.id, atype, message.text.strip())
-    await send_banner(message, t.APPEAL_SENT.format(appeal_id=appeal_id), kb.back_button(), edit=False)
+    await send_banner(message, t.APPEAL_SENT.format(appeal_id=appeal_id), kb.back_button(lang=lang), edit=False)
     type_label = "💡 Предложение" if atype == "suggest" else "⚠️ Жалоба"
     for admin_id in ADMIN_IDS:
         try:
@@ -150,6 +157,7 @@ class VerifyFSM(StatesGroup):
 @router.callback_query(F.data == "verification")
 async def verification_handler(call: CallbackQuery):
     u = db.get_user(call.from_user.id)
+    lang = kb.get_lang(call.from_user.id)
     conn = db.get_conn()
     ver = conn.execute("SELECT * FROM verifications WHERE user_id=?", (call.from_user.id,)).fetchone()
     conn.close()
@@ -165,19 +173,20 @@ async def verification_handler(call: CallbackQuery):
         status_key, extra = "none", "📝 <b>Нажмите кнопку ниже для подачи заявки.</b>"
     await send_banner(call,
         t.VERIFICATION.format(status=t.VERIFICATION_STATUSES.get(status_key, status_key), extra=extra),
-        kb.verification_menu(status_key)
+        kb.verification_menu(status_key, lang=lang)
     )
 
 @router.callback_query(F.data == "verify_apply")
 async def verify_apply(call: CallbackQuery, state: FSMContext):
     await state.set_state(VerifyFSM.waiting_docs)
+    lang = kb.get_lang(call.from_user.id)
     await send_banner(call,
         "🔥 <b>Lolz Team Bot</b>\n\n📤 <b>Подача заявки на верификацию</b>\n\n"
         "<b>Отправьте:</b>\n• <b>Скриншот профиля Telegram</b>\n"
         "• <b>Ссылки на предыдущие сделки (если есть)</b>\n"
         "• <b>Краткое описание деятельности</b>\n\n"
         "<b>Можно несколько сообщений. Напишите /done когда закончите.</b>",
-        kb.back_button("verification")
+        kb.back_button("verification", lang=lang)
     )
 
 @router.message(VerifyFSM.waiting_docs, F.text == "/done")
@@ -190,7 +199,7 @@ async def verify_done(message: Message, state: FSMContext, bot: Bot):
     conn.commit(); conn.close()
     await send_banner(message,
         "🔥 <b>Lolz Team Bot</b>\n\n✅ <b>Заявка отправлена!</b>\n\n<b>Рассмотрим в ближайшее время.</b>",
-        kb.back_button("verification"), edit=False)
+        kb.back_button("verification", lang=lang), edit=False)
     for admin_id in ADMIN_IDS:
         try:
             from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton

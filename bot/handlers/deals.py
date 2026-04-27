@@ -55,6 +55,7 @@ async def is_team_member(bot: Bot, user_id: int) -> bool:
 
 @router.callback_query(F.data == "deal_create")
 async def deal_create(call: CallbackQuery, state: FSMContext):
+    lang = kb.get_lang(call.from_user.id)
     if not db.has_any_requisite(call.from_user.id):
         await send_banner(call, t.DEAL_NO_REQUISITES,
             InlineKeyboardMarkup(inline_keyboard=[
@@ -63,13 +64,14 @@ async def deal_create(call: CallbackQuery, state: FSMContext):
             ]))
         return
     await state.set_state(DealFSM.select_type)
-    await send_banner(call, t.DEAL_SELECT_TYPE, kb.product_type_keyboard())
+    await send_banner(call, t.DEAL_SELECT_TYPE, kb.product_type_keyboard(lang=lang))
 
 # ── Выбор типа товара ──────────────────────────────────
 
 @router.callback_query(F.data.startswith("ptype_"))
 async def deal_select_type(call: CallbackQuery, state: FSMContext):
     ptype = call.data.replace("ptype_", "")
+    lang = kb.get_lang(call.from_user.id)
     if ptype not in PRODUCT_FIELDS:
         await call.answer("❌ Неизвестный тип", show_alert=True)
         return
@@ -87,7 +89,7 @@ async def _ask_field(target, field_info, ptype):
         f"📝 <b>Создание сделки — {ptype_label}</b>\n\n"
         f"{prompt}"
     )
-    await send_banner(target, text, kb.back_button())
+    await send_banner(target, text, kb.back_button(lang=lang))
 
 # ── Сбор полей товара ──────────────────────────────────
 
@@ -105,7 +107,7 @@ async def collect_field(message: Message, state: FSMContext):
     # Валидация
     error = _validate_field(vtype, value)
     if error:
-        await send_banner(message, f"🔥 <b>Lolz Team Bot</b>\n\n{error}", kb.back_button(), edit=False)
+        await send_banner(message, f"🔥 <b>Lolz Team Bot</b>\n\n{error}", kb.back_button(lang=lang), edit=False)
         return
 
     prod_data[field_key] = value
@@ -119,7 +121,7 @@ async def collect_field(message: Message, state: FSMContext):
         # Все поля собраны — выбор валюты
         await state.update_data(product_data=prod_data)
         await state.set_state(DealFSM.select_currency)
-        await send_banner(message, t.DEAL_SELECT_CURRENCY, kb.currency_keyboard("deal_cur"), edit=False)
+        await send_banner(message, t.DEAL_SELECT_CURRENCY, kb.currency_keyboard("deal_cur", lang=lang), edit=False)
 
 def _validate_field(vtype: str, value: str) -> str:
     """Возвращает текст ошибки или пустую строку если ок."""
@@ -153,9 +155,10 @@ def _validate_field(vtype: str, value: str) -> str:
 @router.callback_query(F.data.startswith("deal_cur_"))
 async def deal_select_currency(call: CallbackQuery, state: FSMContext):
     currency = call.data.replace("deal_cur_", "")
+    lang = kb.get_lang(call.from_user.id)
     await state.update_data(currency=currency)
     await state.set_state(DealFSM.enter_amount)
-    await send_banner(call, t.DEAL_ENTER_AMOUNT.format(currency=currency), kb.back_button())
+    await send_banner(call, t.DEAL_ENTER_AMOUNT.format(currency=currency), kb.back_button(lang=lang))
 
 # ── Ввод суммы ─────────────────────────────────────────
 
@@ -168,7 +171,7 @@ async def deal_enter_amount(message: Message, state: FSMContext):
     except ValueError:
         await send_banner(message,
             "🔥 <b>Lolz Team Bot</b>\n\n❌ <b>Введите корректную сумму (число больше 0).</b>",
-            kb.back_button(), edit=False)
+            kb.back_button(lang=lang), edit=False)
         return
 
     data = await state.get_data()
@@ -188,13 +191,14 @@ async def deal_enter_amount(message: Message, state: FSMContext):
             product_info=info_str,
             amount=amount, currency=currency, fee=fee, total=total,
         ),
-        kb.confirm_kb("deal"), edit=False)
+        kb.confirm_kb("deal", lang=lang), edit=False)
 
 # ── Подтверждение создания ─────────────────────────────
 
 @router.callback_query(F.data == "confirm_deal", DealFSM.confirm)
 async def deal_confirmed(call: CallbackQuery, state: FSMContext, bot: Bot):
     data = await state.get_data()
+    lang = kb.get_lang(call.from_user.id)
     await state.clear()
 
     ptype     = data["product_type"]
@@ -222,7 +226,7 @@ async def deal_confirmed(call: CallbackQuery, state: FSMContext, bot: Bot):
             amount=amount, currency=currency, fee=fee,
             bot_username=BOT_USERNAME,
         ),
-        kb.deal_created_kb(deal_id, BOT_USERNAME))
+        kb.deal_created_kb(deal_id, BOT_USERNAME, lang=lang))
 
 # ── Покупатель открывает сделку по ссылке ─────────────
 
@@ -231,17 +235,17 @@ async def open_deal_for_buyer(message: Message, deal_id: str, bot: Bot):
     if not deal:
         await send_banner(message,
             "🔥 <b>Lolz Team Bot</b>\n\n❌ <b>Сделка не найдена или уже завершена.</b>",
-            kb.back_button(), edit=False)
+            kb.back_button(lang=lang), edit=False)
         return
     if deal["status"] not in ("pending",):
         await send_banner(message,
             "🔥 <b>Lolz Team Bot</b>\n\n⚠️ <b>Эта сделка уже недоступна для оплаты.</b>",
-            kb.back_button(), edit=False)
+            kb.back_button(lang=lang), edit=False)
         return
     if deal["seller_id"] == message.from_user.id:
         await send_banner(message,
             "🔥 <b>Lolz Team Bot</b>\n\n❌ <b>Вы не можете купить собственный товар.</b>",
-            kb.back_button(), edit=False)
+            kb.back_button(lang=lang), edit=False)
         return
 
     # Привязываем покупателя
@@ -261,7 +265,7 @@ async def open_deal_for_buyer(message: Message, deal_id: str, bot: Bot):
             fee=deal["fee"],
             phone=GUARANTOR_PHONE,
         ),
-        kb.deal_buyer_kb(deal_id), edit=False)
+        kb.deal_buyer_kb(deal_id, lang=lang), edit=False)
 
     # Уведомляем продавца о входе покупателя
     buyer = db.get_user(message.from_user.id)
@@ -282,7 +286,7 @@ async def open_deal_for_buyer(message: Message, deal_id: str, bot: Bot):
                 buyer_deals=buyer_deals,
             ),
             parse_mode="HTML",
-            reply_markup=kb.back_button()
+            reply_markup=kb.back_button(lang=lang)
         )
     except Exception:
         pass
@@ -292,6 +296,7 @@ async def open_deal_for_buyer(message: Message, deal_id: str, bot: Bot):
 @router.callback_query(F.data.startswith("buyer_paid_"))
 async def buyer_paid(call: CallbackQuery, bot: Bot):
     deal_id = call.data.replace("buyer_paid_", "")
+    lang = kb.get_lang(call.from_user.id)
     deal = db.get_deal(deal_id)
 
     if not deal or deal["status"] not in ("waiting_payment", "pending"):
@@ -332,13 +337,13 @@ async def buyer_paid(call: CallbackQuery, bot: Bot):
         # Уведомляем покупателя
         try:
             await bot.send_message(call.from_user.id, result_text, parse_mode="HTML",
-                                   reply_markup=kb.back_button())
+                                   reply_markup=kb.back_button(lang=lang))
         except Exception:
             pass
         # Уведомляем продавца
         try:
             await bot.send_message(deal["seller_id"], result_text, parse_mode="HTML",
-                                   reply_markup=kb.back_button())
+                                   reply_markup=kb.back_button(lang=lang))
         except Exception:
             pass
         # Уведомляем гаранта
@@ -368,12 +373,12 @@ async def buyer_paid(call: CallbackQuery, bot: Bot):
         )
         try:
             await bot.send_message(call.from_user.id, fail_text, parse_mode="HTML",
-                                   reply_markup=kb.back_button())
+                                   reply_markup=kb.back_button(lang=lang))
         except Exception:
             pass
         try:
             await bot.send_message(deal["seller_id"], fail_text, parse_mode="HTML",
-                                   reply_markup=kb.back_button())
+                                   reply_markup=kb.back_button(lang=lang))
         except Exception:
             pass
 
@@ -382,6 +387,7 @@ async def buyer_paid(call: CallbackQuery, bot: Bot):
 @router.callback_query(F.data.startswith("admin_complete_"))
 async def admin_complete_deal(call: CallbackQuery, bot: Bot):
     from config import ADMIN_IDS
+    lang = kb.get_lang(call.from_user.id)
     if call.from_user.id not in ADMIN_IDS:
         await call.answer("❌ Нет доступа", show_alert=True)
         return
@@ -402,13 +408,14 @@ async def admin_complete_deal(call: CallbackQuery, bot: Bot):
 
     for uid in filter(None, [deal["seller_id"], deal.get("buyer_id")]):
         try:
-            await bot.send_message(uid, complete_text, parse_mode="HTML", reply_markup=kb.back_button())
+            await bot.send_message(uid, complete_text, parse_mode="HTML", reply_markup=kb.back_button(lang=lang))
         except Exception:
             pass
 
 @router.callback_query(F.data.startswith("admin_cancel_"))
 async def admin_cancel_deal(call: CallbackQuery, bot: Bot):
     from config import ADMIN_IDS
+    lang = kb.get_lang(call.from_user.id)
     if call.from_user.id not in ADMIN_IDS:
         await call.answer("❌ Нет доступа", show_alert=True)
         return
@@ -423,7 +430,7 @@ async def admin_cancel_deal(call: CallbackQuery, bot: Bot):
     if deal:
         for uid in filter(None, [deal["seller_id"], deal.get("buyer_id")]):
             try:
-                await bot.send_message(uid, cancel_text, parse_mode="HTML", reply_markup=kb.back_button())
+                await bot.send_message(uid, cancel_text, parse_mode="HTML", reply_markup=kb.back_button(lang=lang))
             except Exception:
                 pass
 
@@ -432,6 +439,7 @@ async def admin_cancel_deal(call: CallbackQuery, bot: Bot):
 @router.callback_query(F.data.startswith("deal_cancel_"))
 async def deal_cancel(call: CallbackQuery, bot: Bot):
     deal_id = call.data.replace("deal_cancel_", "")
+    lang = kb.get_lang(call.from_user.id)
     deal = db.get_deal(deal_id)
     if not deal:
         await call.answer("❌ Сделка не найдена", show_alert=True)
@@ -445,12 +453,12 @@ async def deal_cancel(call: CallbackQuery, bot: Bot):
 
     db.update_deal(deal_id, status="cancelled")
     cancel_text = t.DEAL_CANCELLED.format(deal_id=deal_id, support=SUPPORT_USERNAME)
-    await send_banner(call, cancel_text, kb.back_button())
+    await send_banner(call, cancel_text, kb.back_button(lang=lang))
 
     other_id = deal["buyer_id"] if deal["seller_id"] == call.from_user.id else deal["seller_id"]
     if other_id:
         try:
-            await bot.send_message(other_id, cancel_text, parse_mode="HTML", reply_markup=kb.back_button())
+            await bot.send_message(other_id, cancel_text, parse_mode="HTML", reply_markup=kb.back_button(lang=lang))
         except Exception:
             pass
 
@@ -459,8 +467,9 @@ async def deal_cancel(call: CallbackQuery, bot: Bot):
 @router.callback_query(F.data == "my_deals")
 async def my_deals(call: CallbackQuery):
     deals = db.get_user_deals(call.from_user.id)
+    lang = kb.get_lang(call.from_user.id)
     if not deals:
-        await send_banner(call, t.MY_DEALS_EMPTY, kb.back_button())
+        await send_banner(call, t.MY_DEALS_EMPTY, kb.back_button(lang=lang))
         return
 
     uid = call.from_user.id
@@ -506,6 +515,7 @@ async def my_deals(call: CallbackQuery):
 @router.callback_query(F.data.startswith("deal_view_"))
 async def deal_view(call: CallbackQuery):
     deal_id = call.data.replace("deal_view_", "")
+    lang = kb.get_lang(call.from_user.id)
     deal = db.get_deal(deal_id)
     if not deal:
         await call.answer("❌ Сделка не найдена", show_alert=True)
@@ -545,4 +555,4 @@ async def deal_view(call: CallbackQuery):
         f"📅 <b>Создана:</b> <b>{deal['created_at'][:10]}</b>\n"
         f"👤 <b>Ваша роль:</b> {role}"
     )
-    await send_banner(call, text, kb.deal_view_kb(deal_id, role_key, deal["status"]))
+    await send_banner(call, text, kb.deal_view_kb(deal_id, role_key, deal["status"], lang=lang))
