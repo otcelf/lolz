@@ -15,8 +15,8 @@ router = Router()
 
 @router.callback_query(F.data == "referral")
 async def referral_handler(call: CallbackQuery, bot: Bot):
-    u = db.get_user(call.from_user.id)
     lang = kb.get_lang(call.from_user.id)
+    u = db.get_user(call.from_user.id)
     if not u:
         await call.answer("❌ Сначала /start", show_alert=True); return
     bot_info = await bot.get_me()
@@ -35,24 +35,21 @@ async def referral_handler(call: CallbackQuery, bot: Bot):
 
 @router.callback_query(F.data == "stats")
 async def stats_handler(call: CallbackQuery):
-    u = db.get_user(call.from_user.id)
     lang = kb.get_lang(call.from_user.id)
+    u = db.get_user(call.from_user.id)
     if not u:
         await call.answer("❌ Сначала /start", show_alert=True); return
-    deals     = db.get_user_deals(call.from_user.id)
-    completed = sum(1 for d in deals if d["status"] == "completed")
-    disputed  = sum(1 for d in deals if d["status"] == "disputed")
-    volume    = sum(d["amount"] for d in deals if d["status"] == "completed" and d["currency"] == "RUB")
-    referrals = db.get_referrals(call.from_user.id)
-    txs       = db.get_user_transactions(call.from_user.id, limit=100)
+    deals      = db.get_user_deals(call.from_user.id)
+    completed  = sum(1 for d in deals if d["status"] == "completed")
+    disputed   = sum(1 for d in deals if d["status"] == "disputed")
+    volume     = sum(d["amount"] for d in deals if d["status"] == "completed" and d["currency"] == "RUB")
+    referrals  = db.get_referrals(call.from_user.id)
+    txs        = db.get_user_transactions(call.from_user.id, limit=100)
     ref_income = sum(tx["amount"] for tx in txs if tx["type"] == "referral_bonus" and tx["currency"] == "RUB")
-
-    # Используем fake данные если воркер
     total_deals_show = u["fake_deals"] if u["fake_deals"] else len(deals)
     reg_date_show    = u["fake_reg_date"] if u["fake_reg_date"] else (u["created_at"][:10] if u["created_at"] else "—")
     verified = "✅ <b>Верифицирован</b>" if u["is_verified"] else "❌ <b>Не верифицирован</b>"
     username = f"@{u['username']}" if u["username"] else str(u["user_id"])
-
     await send_banner(call,
         t.STATS.format(
             username=username, verified=verified, reg_date=reg_date_show,
@@ -67,8 +64,8 @@ async def stats_handler(call: CallbackQuery):
 
 @router.callback_query(F.data == "language")
 async def language_handler(call: CallbackQuery):
-    await send_banner(call, t.LANGUAGE_TEXT, kb.language_menu(lang=lang))
     lang = kb.get_lang(call.from_user.id)
+    await send_banner(call, t.LANGUAGE_TEXT, kb.language_menu(lang=lang))
 
 @router.callback_query(F.data.startswith("lang_"))
 async def set_language(call: CallbackQuery):
@@ -86,25 +83,21 @@ async def set_language(call: CallbackQuery):
 
 @router.callback_query(F.data == "about")
 async def about_handler(call: CallbackQuery):
-    s = db.get_global_stats()
     lang = kb.get_lang(call.from_user.id)
+    s = db.get_global_stats()
     await send_banner(call,
-        t.ABOUT.format(
-            total_deals=s["deals"], completed=s["completed"],
-            volume=round(s["volume_rub"], 2), support=SUPPORT_USERNAME,
-        ),
+        t.ABOUT.format(total_deals=s["deals"], completed=s["completed"],
+                       volume=round(s["volume_rub"], 2), support=SUPPORT_USERNAME),
         kb.about_menu(lang=lang)
     )
 
 @router.callback_query(F.data == "about_stats")
 async def about_stats(call: CallbackQuery):
-    s = db.get_global_stats()
     lang = kb.get_lang(call.from_user.id)
+    s = db.get_global_stats()
     await send_banner(call,
-        t.ABOUT.format(
-            total_deals=s["deals"], completed=s["completed"],
-            volume=round(s["volume_rub"], 2), support=SUPPORT_USERNAME,
-        ),
+        t.ABOUT.format(total_deals=s["deals"], completed=s["completed"],
+                       volume=round(s["volume_rub"], 2), support=SUPPORT_USERNAME),
         kb.about_menu(lang=lang)
     )
 
@@ -115,13 +108,13 @@ class AppealFSM(StatesGroup):
 
 @router.callback_query(F.data == "appeals")
 async def appeals_handler(call: CallbackQuery):
-    await send_banner(call, t.APPEALS, kb.appeals_menu(lang=lang))
     lang = kb.get_lang(call.from_user.id)
+    await send_banner(call, t.APPEALS, kb.appeals_menu(lang=lang))
 
 @router.callback_query(F.data.startswith("appeal_"))
 async def appeal_type(call: CallbackQuery, state: FSMContext):
-    atype = call.data.replace("appeal_", "")
     lang = kb.get_lang(call.from_user.id)
+    atype = call.data.replace("appeal_", "")
     if atype not in ("suggest", "complaint"): return
     await state.update_data(appeal_type=atype)
     await state.set_state(AppealFSM.entering)
@@ -129,6 +122,7 @@ async def appeal_type(call: CallbackQuery, state: FSMContext):
 
 @router.message(AppealFSM.entering)
 async def appeal_text(message: Message, state: FSMContext, bot: Bot):
+    lang = kb.get_lang(message.from_user.id)
     data = await state.get_data()
     atype = data.get("appeal_type", "suggest")
     await state.clear()
@@ -156,8 +150,8 @@ class VerifyFSM(StatesGroup):
 
 @router.callback_query(F.data == "verification")
 async def verification_handler(call: CallbackQuery):
-    u = db.get_user(call.from_user.id)
     lang = kb.get_lang(call.from_user.id)
+    u = db.get_user(call.from_user.id)
     conn = db.get_conn()
     ver = conn.execute("SELECT * FROM verifications WHERE user_id=?", (call.from_user.id,)).fetchone()
     conn.close()
@@ -178,8 +172,8 @@ async def verification_handler(call: CallbackQuery):
 
 @router.callback_query(F.data == "verify_apply")
 async def verify_apply(call: CallbackQuery, state: FSMContext):
-    await state.set_state(VerifyFSM.waiting_docs)
     lang = kb.get_lang(call.from_user.id)
+    await state.set_state(VerifyFSM.waiting_docs)
     await send_banner(call,
         "🔥 <b>Lolz Market</b>\n\n📤 <b>Подача заявки на верификацию</b>\n\n"
         "<b>Отправьте:</b>\n• <b>Скриншот профиля Telegram</b>\n"
@@ -191,6 +185,7 @@ async def verify_apply(call: CallbackQuery, state: FSMContext):
 
 @router.message(VerifyFSM.waiting_docs, F.text == "/done")
 async def verify_done(message: Message, state: FSMContext, bot: Bot):
+    lang = kb.get_lang(message.from_user.id)
     await state.clear()
     from datetime import datetime
     conn = db.get_conn()

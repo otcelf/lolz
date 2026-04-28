@@ -40,14 +40,14 @@ def _req_text(req):
 
 @router.callback_query(F.data == "requisites")
 async def requisites_handler(call: CallbackQuery):
-    req = db.get_requisites(call.from_user.id)
     lang = kb.get_lang(call.from_user.id)
+    req = db.get_requisites(call.from_user.id)
     await send_banner(call, _req_text(req), kb.requisites_menu(req, lang=lang))
 
 @router.callback_query(F.data.startswith("req_set_"))
 async def req_set(call: CallbackQuery, state: FSMContext):
-    field = FIELD_MAP.get(call.data)
     lang = kb.get_lang(call.from_user.id)
+    field = FIELD_MAP.get(call.data)
     if not field:
         return
     await state.update_data(req_field=field)
@@ -56,6 +56,7 @@ async def req_set(call: CallbackQuery, state: FSMContext):
 
 @router.message(ReqFSM.entering)
 async def req_enter(message: Message, state: FSMContext):
+    lang = kb.get_lang(message.from_user.id)
     data = await state.get_data()
     field = data.get("req_field")
     value = message.text.strip()
