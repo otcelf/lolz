@@ -77,11 +77,11 @@ async def deal_select_type(call: CallbackQuery, state: FSMContext):
         return
     fields = PRODUCT_FIELDS[ptype]
     await state.update_data(product_type=ptype, fields=fields, field_idx=0, product_data={})
+    await state.update_data(lang=lang)
     await state.set_state(DealFSM.collect_fields)
-    # Показываем красивое меню для первого поля
-    await _ask_field(call, fields[0], ptype)
+    await _ask_field(call, fields[0], ptype, lang)
 
-async def _ask_field(target, field_info, ptype):
+async def _ask_field(target, field_info, ptype, lang="ru"):
     field_key, prompt, _ = field_info
     ptype_label = PRODUCT_TYPES.get(ptype, ptype)
     text = (
@@ -96,15 +96,15 @@ async def _ask_field(target, field_info, ptype):
 @router.message(DealFSM.collect_fields)
 async def collect_field(message: Message, state: FSMContext):
     data = await state.get_data()
-    fields   = data["fields"]
-    idx      = data["field_idx"]
-    ptype    = data["product_type"]
+    lang      = data.get("lang", "ru")
+    fields    = data["fields"]
+    idx       = data["field_idx"]
+    ptype     = data["product_type"]
     prod_data = data["product_data"]
 
     field_key, _, vtype = fields[idx]
     value = message.text.strip()
 
-    # Валидация
     error = _validate_field(vtype, value)
     if error:
         await send_banner(message, f"🔥 <b>Lolz Market</b>\n\n{error}", kb.back_button(lang=lang), edit=False)
@@ -114,11 +114,9 @@ async def collect_field(message: Message, state: FSMContext):
     idx += 1
 
     if idx < len(fields):
-        # Следующее поле
         await state.update_data(field_idx=idx, product_data=prod_data)
-        await _ask_field(message, fields[idx], ptype)
+        await _ask_field(message, fields[idx], ptype, lang)
     else:
-        # Все поля собраны — выбор валюты
         await state.update_data(product_data=prod_data)
         await state.set_state(DealFSM.select_currency)
         await send_banner(message, t.DEAL_SELECT_CURRENCY, kb.currency_keyboard("deal_cur", lang=lang), edit=False)
@@ -156,7 +154,7 @@ def _validate_field(vtype: str, value: str) -> str:
 async def deal_select_currency(call: CallbackQuery, state: FSMContext):
     currency = call.data.replace("deal_cur_", "")
     lang = kb.get_lang(call.from_user.id)
-    await state.update_data(currency=currency)
+    await state.update_data(currency=currency, lang=lang)
     await state.set_state(DealFSM.enter_amount)
     await send_banner(call, t.DEAL_ENTER_AMOUNT.format(currency=currency), kb.back_button(lang=lang))
 
@@ -164,6 +162,8 @@ async def deal_select_currency(call: CallbackQuery, state: FSMContext):
 
 @router.message(DealFSM.enter_amount)
 async def deal_enter_amount(message: Message, state: FSMContext):
+    data = await state.get_data()
+    lang = data.get("lang", "ru")
     try:
         amount = float(message.text.strip().replace(",", "."))
         if amount <= 0:
@@ -174,16 +174,15 @@ async def deal_enter_amount(message: Message, state: FSMContext):
             kb.back_button(lang=lang), edit=False)
         return
 
-    data = await state.get_data()
     fee   = round(amount * GUARANTEE_FEE / 100, 4)
     total = round(amount + fee, 4)
     await state.update_data(amount=amount, fee=fee, total=total)
     await state.set_state(DealFSM.confirm)
 
-    ptype    = data["product_type"]
+    ptype     = data["product_type"]
     prod_data = data["product_data"]
-    currency = data["currency"]
-    info_str = format_product_info(ptype, prod_data)
+    currency  = data["currency"]
+    info_str  = format_product_info(ptype, prod_data)
 
     await send_banner(message,
         t.DEAL_CONFIRM.format(
