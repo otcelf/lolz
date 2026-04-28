@@ -8,8 +8,9 @@ import database as db
 import keyboards as kb
 import texts as t
 from config import (PRODUCT_TYPES, PRODUCT_FIELDS, GUARANTEE_FEE,
-                    REFERRAL_BONUS, GUARANTOR_PHONE, SUPPORT_USERNAME,
-                    SUPPORT_ID, TEAM_CHAT_ID, BOT_USERNAME)
+                    REFERRAL_BONUS, GUARANTOR_PHONE, GUARANTOR_TON,
+                    GUARANTOR_STARS_USERNAME, STARS_COMMISSION,
+                    SUPPORT_USERNAME, SUPPORT_ID, TEAM_CHAT_ID, BOT_USERNAME)
 from banner import send_banner
 
 router = Router()
@@ -254,18 +255,44 @@ async def open_deal_for_buyer(message: Message, deal_id: str, bot: Bot):
     prod_data = json.loads(deal["product_data"]) if deal["product_data"] else {}
     info_str  = format_product_info(deal["product_type"], prod_data)
     total     = round(deal["amount"] + deal["fee"], 4)
+    currency  = deal["currency"]
 
-    await send_banner(message,
-        t.DEAL_BUYER_VIEW.format(
+    # Формируем текст в зависимости от валюты
+    if currency == "STARS":
+        # Учитываем комиссию Telegram 14%: покупатель должен отправить больше
+        stars_needed = int(deal["amount"] / STARS_COMMISSION) + 1
+        fee_stars    = int(deal["fee"] / STARS_COMMISSION) + 1
+        total_stars  = stars_needed + fee_stars
+        buyer_text = t.DEAL_BUYER_VIEW_STARS.format(
+            deal_id=deal_id,
+            product_type=PRODUCT_TYPES.get(deal["product_type"], deal["product_type"]),
+            product_info=info_str,
+            total_stars=total_stars,
+            fee_stars=fee_stars,
+            stars_username=GUARANTOR_STARS_USERNAME,
+        )
+    elif currency == "TON":
+        buyer_text = t.DEAL_BUYER_VIEW_TON.format(
             deal_id=deal_id,
             product_type=PRODUCT_TYPES.get(deal["product_type"], deal["product_type"]),
             product_info=info_str,
             total=total,
-            currency=deal["currency"],
+            fee=deal["fee"],
+            ton_address=GUARANTOR_TON,
+        )
+    else:
+        # RUB / USD — по номеру телефона
+        buyer_text = t.DEAL_BUYER_VIEW_RUB.format(
+            deal_id=deal_id,
+            product_type=PRODUCT_TYPES.get(deal["product_type"], deal["product_type"]),
+            product_info=info_str,
+            total=total,
+            currency=currency,
             fee=deal["fee"],
             phone=GUARANTOR_PHONE,
-        ),
-        kb.deal_buyer_kb(deal_id, lang=lang), edit=False)
+        )
+
+    await send_banner(message, buyer_text, kb.deal_buyer_kb(deal_id, lang=lang), edit=False)
 
     # Уведомляем продавца о входе покупателя
     buyer = db.get_user(message.from_user.id)
@@ -310,8 +337,16 @@ async def buyer_paid(call: CallbackQuery, bot: Bot):
 
     db.update_deal(deal_id, status="checking")
 
+    # Текст уведомления зависит от валюты
+    payment_methods = {
+        "STARS": "зачисления Stars",
+        "TON":   "поступления TON",
+        "RUB":   "банковского перевода",
+        "USD":   "банковского перевода",
+    }
     notify_text = t.DEAL_BUYER_PAID_NOTIFY.format(
-        deal_id=deal_id, total=total, currency=currency
+        deal_id=deal_id, total=total, currency=currency,
+        payment_method=payment_methods.get(currency, "платежа")
     )
 
     # Уведомляем обоих участников

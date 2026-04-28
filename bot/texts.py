@@ -96,7 +96,7 @@ DEAL_CREATED = (
 #  ПОКУПАТЕЛЬ
 # ══════════════════════════════════════
 
-DEAL_BUYER_VIEW = (
+DEAL_BUYER_VIEW_RUB = (
     H + D +
     "🛒 <b>Сделка</b> <b>#{deal_id}</b>\n\n"
     "📦 <b>Тип товара:</b> <b>{product_type}</b>\n"
@@ -115,13 +115,55 @@ DEAL_BUYER_VIEW = (
     "• <b>Никогда не переводите без подтверждения в боте!</b>"
 )
 
+DEAL_BUYER_VIEW_TON = (
+    H + D +
+    "🛒 <b>Сделка</b> <b>#{deal_id}</b>\n\n"
+    "📦 <b>Тип товара:</b> <b>{product_type}</b>\n"
+    "{product_info}"
+    + D +
+    "💰 <b>Сумма к оплате:</b> <b>{total} TON</b>\n"
+    "💸 <b>Комиссия гаранта (3%):</b> <b>{fee} TON</b>\n"
+    + D +
+    "💎 <b>Реквизиты для перевода TON:</b>\n\n"
+    "📬 <b>Адрес кошелька:</b>\n"
+    "<code>{ton_address}</code>\n\n"
+    "💡 <b>Отправить можно через:</b>\n"
+    "• <b>Tonkeeper</b>\n"
+    "• <b>@wallet в Telegram</b>\n"
+    "• <b>Fragment.com</b>\n"
+    + D +
+    "⚠️ <b>Переводите ТОЧНУЮ сумму, затем нажмите «Я оплатил»</b>"
+)
+
+DEAL_BUYER_VIEW_STARS = (
+    H + D +
+    "🛒 <b>Сделка</b> <b>#{deal_id}</b>\n\n"
+    "📦 <b>Тип товара:</b> <b>{product_type}</b>\n"
+    "{product_info}"
+    + D +
+    "⭐ <b>Сумма к оплате:</b> <b>{total_stars} Stars</b>\n"
+    "💡 <b>Учтена комиссия Telegram (14%)</b>\n"
+    "💸 <b>Комиссия гаранта (3%):</b> <b>{fee_stars} Stars</b>\n"
+    + D +
+    "⭐ <b>Как отправить Stars:</b>\n\n"
+    "👤 <b>Получатель:</b> <b>@{stars_username}</b>\n\n"
+    "📱 <b>Способы отправки:</b>\n"
+    "• <b>Fragment.com → Send Stars</b>\n"
+    "• <b>split.tg</b>\n"
+    "• <b>Через профиль @{stars_username} в Telegram</b>\n"
+    + D +
+    "⚠️ <b>Отправьте ТОЧНОЕ количество Stars, затем нажмите «Я оплатил»</b>"
+)
+
+DEAL_BUYER_VIEW = DEAL_BUYER_VIEW_RUB  # дефолт для обратной совместимости
+
 DEAL_BUYER_PAID_NOTIFY = (
     H + D +
     "🔔 <b>Покупатель нажал «Я оплатил»</b>\n\n"
     "🆔 <b>Сделка:</b> <code>#{deal_id}</code>\n"
     "💰 <b>Сумма:</b> <b>{total} {currency}</b>\n"
     + D +
-    "⏳ <b>Система проверяет поступление платежа...</b>\n"
+    "⏳ <b>Система проверяет поступление {payment_method}...</b>\n"
     "<b>Ожидайте результата.</b>"
 )
 

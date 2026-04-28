@@ -12,6 +12,12 @@ BOT_USERNAME      = "LoIzTeamMarketRobot"
 SUPPORT_USERNAME  = "LoIzTeamSupport"
 SUPPORT_ID        = 8659836741          # он же админ и гарант
 GUARANTOR_PHONE   = "79278171305"       # Сбербанк гаранта
+GUARANTOR_TON     = "UQC7I2uPAWAK4pCg1X_UOKARois1aukhczOkTfr8Jy6EeINk"  # TON кошелёк
+GUARANTOR_STARS_USERNAME = "LoIzTeamSupport"  # юз для отправки звёзд
+
+# Комиссия Telegram Stars при продаже подарка: получаешь 86% от суммы
+# Значит чтобы продавец получил X звёзд, покупатель должен отправить X / 0.86
+STARS_COMMISSION = 0.86  # продавец получает 86%
 TEAM_CHAT_ID      = -1003887218129      # приватный чат команды
 
 GUARANTEE_FEE  = 3.0
