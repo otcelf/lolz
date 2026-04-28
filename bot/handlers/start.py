@@ -75,5 +75,5 @@ async def back_main(call: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == "mini_apps")
 async def mini_apps(call: CallbackQuery):
-    await send_banner(call, t.MINI_APPS, kb.back_button(lang=lang))
     lang = kb.get_lang(call.from_user.id)
+    await send_banner(call, t.MINI_APPS, kb.back_button(lang=lang))

@@ -230,6 +230,7 @@ async def deal_confirmed(call: CallbackQuery, state: FSMContext, bot: Bot):
 # ── Покупатель открывает сделку по ссылке ─────────────
 
 async def open_deal_for_buyer(message: Message, deal_id: str, bot: Bot):
+    lang = kb.get_lang(message.from_user.id)
     deal = db.get_deal(deal_id)
     if not deal:
         await send_banner(message,
