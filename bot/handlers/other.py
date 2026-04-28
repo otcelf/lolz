@@ -139,7 +139,7 @@ async def appeal_text(message: Message, state: FSMContext, bot: Bot):
         try:
             from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
             await bot.send_message(admin_id,
-                f"🔥 <b>Lolz Team Bot</b>\n\n📩 <b>Новое обращение</b>\n\n"
+                f"🔥 <b>Lolz Market</b>\n\n📩 <b>Новое обращение</b>\n\n"
                 f"🆔 <code>{appeal_id}</code>\n📌 <b>{type_label}</b>\n"
                 f"👤 <b>@{message.from_user.username or message.from_user.id}</b>\n\n"
                 f"<b>{message.text[:500]}</b>",
@@ -181,7 +181,7 @@ async def verify_apply(call: CallbackQuery, state: FSMContext):
     await state.set_state(VerifyFSM.waiting_docs)
     lang = kb.get_lang(call.from_user.id)
     await send_banner(call,
-        "🔥 <b>Lolz Team Bot</b>\n\n📤 <b>Подача заявки на верификацию</b>\n\n"
+        "🔥 <b>Lolz Market</b>\n\n📤 <b>Подача заявки на верификацию</b>\n\n"
         "<b>Отправьте:</b>\n• <b>Скриншот профиля Telegram</b>\n"
         "• <b>Ссылки на предыдущие сделки (если есть)</b>\n"
         "• <b>Краткое описание деятельности</b>\n\n"
@@ -198,13 +198,13 @@ async def verify_done(message: Message, state: FSMContext, bot: Bot):
                  (message.from_user.id, "pending", datetime.now().isoformat()))
     conn.commit(); conn.close()
     await send_banner(message,
-        "🔥 <b>Lolz Team Bot</b>\n\n✅ <b>Заявка отправлена!</b>\n\n<b>Рассмотрим в ближайшее время.</b>",
+        "🔥 <b>Lolz Market</b>\n\n✅ <b>Заявка отправлена!</b>\n\n<b>Рассмотрим в ближайшее время.</b>",
         kb.back_button("verification", lang=lang), edit=False)
     for admin_id in ADMIN_IDS:
         try:
             from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
             await bot.send_message(admin_id,
-                f"🔥 <b>Lolz Team Bot</b>\n\n🛡 <b>Новая заявка на верификацию</b>\n\n"
+                f"🔥 <b>Lolz Market</b>\n\n🛡 <b>Новая заявка на верификацию</b>\n\n"
                 f"👤 <b>@{message.from_user.username or message.from_user.id}</b>\n"
                 f"🆔 <code>{message.from_user.id}</code>",
                 parse_mode="HTML",
@@ -217,5 +217,5 @@ async def verify_done(message: Message, state: FSMContext, bot: Bot):
 @router.message(VerifyFSM.waiting_docs)
 async def verify_collect(message: Message):
     await send_banner(message,
-        "🔥 <b>Lolz Team Bot</b>\n\n📎 <b>Получено. Продолжайте или отправьте /done.</b>",
+        "🔥 <b>Lolz Market</b>\n\n📎 <b>Получено. Продолжайте или отправьте /done.</b>",
         None, edit=False)

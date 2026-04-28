@@ -1,4 +1,4 @@
-H = "🔥 <b>Lolz Team Bot</b>\n"
+H = "🔥 <b>Lolz Market</b>\n"
 D = "━━━━━━━━━━━━━━━━━━━━━━\n"
 
 # ══════════════════════════════════════
@@ -6,15 +6,15 @@ D = "━━━━━━━━━━━━━━━━━━━━━━\n"
 # ══════════════════════════════════════
 
 TRANSLATIONS = {
-    "ru": {"title": "👋 <b>Добро пожаловать, {name}!</b>", "desc": "🤝 <b>Lolz Team Bot — надёжный P2P-гарант для безопасных сделок в Telegram.</b>", "feat": "✨ <b>Возможности платформы:</b>", "f1": "🛡 <b>Защита от мошенников</b>", "f2": "💰 <b>Автоматическое удержание средств</b>", "f3": "📊 <b>Прозрачная статистика сделок</b>", "f4": "🕐 <b>Поддержка 24/7</b>", "f5": "📜 <b>Полная история операций</b>", "f6": "🔗 <b>Реферальная программа</b>", "warn": "💡 <b>Важно: никогда не переводите средства без подтверждения в боте!</b>"},
-    "en": {"title": "👋 <b>Welcome, {name}!</b>", "desc": "🤝 <b>Lolz Team Bot — reliable P2P escrow for secure deals in Telegram.</b>", "feat": "✨ <b>Platform features:</b>", "f1": "🛡 <b>Fraud protection</b>", "f2": "💰 <b>Automatic fund holding</b>", "f3": "📊 <b>Transparent statistics</b>", "f4": "🕐 <b>24/7 Support</b>", "f5": "📜 <b>Full transaction history</b>", "f6": "🔗 <b>Referral program</b>", "warn": "💡 <b>Important: never transfer funds without bot confirmation!</b>"},
-    "uz": {"title": "👋 <b>Xush kelibsiz, {name}!</b>", "desc": "🤝 <b>Lolz Team Bot — ishonchli P2P kafolat Telegramdagi xavfsiz bitimlar uchun.</b>", "feat": "✨ <b>Platforma imkoniyatlari:</b>", "f1": "🛡 <b>Firibgarlardan himoya</b>", "f2": "💰 <b>Mablag'larni avtomatik ushlab turish</b>", "f3": "📊 <b>Shaffof statistika</b>", "f4": "🕐 <b>24/7 Qo'llab-quvvatlash</b>", "f5": "📜 <b>To'liq tarix</b>", "f6": "🔗 <b>Referal dasturi</b>", "warn": "💡 <b>Muhim: botda tasdiqlamasdan mablag' o'tkazmang!</b>"},
-    "tj": {"title": "👋 <b>Хуш омадед, {name}!</b>", "desc": "🤝 <b>Lolz Team Bot — кафили боэтимоди P2P барои муомилаҳои бехатар дар Telegram.</b>", "feat": "✨ <b>Имкониятҳои платформа:</b>", "f1": "🛡 <b>Ҳимоя аз фиребгарон</b>", "f2": "💰 <b>Нигоҳ доштани маблағ</b>", "f3": "📊 <b>Омори шаффоф</b>", "f4": "🕐 <b>Дастгирии 24/7</b>", "f5": "📜 <b>Таърихи пурра</b>", "f6": "🔗 <b>Барномаи реферал</b>", "warn": "💡 <b>Муҳим: бидуни тасдиқи бот маблағ интиқол надиҳед!</b>"},
-    "zh": {"title": "👋 <b>欢迎, {name}!</b>", "desc": "🤝 <b>Lolz Team Bot — 可靠的P2P担保，用于Telegram中的安全交易。</b>", "feat": "✨ <b>平台功能:</b>", "f1": "🛡 <b>防欺诈保护</b>", "f2": "💰 <b>自动资金托管</b>", "f3": "📊 <b>透明统计</b>", "f4": "🕐 <b>24/7 支持</b>", "f5": "📜 <b>完整历史记录</b>", "f6": "🔗 <b>推荐计划</b>", "warn": "💡 <b>重要: 未经机器人确认请勿转账!</b>"},
-    "ja": {"title": "👋 <b>ようこそ, {name}!</b>", "desc": "🤝 <b>Lolz Team Bot — Telegramでの安全な取引のための信頼できるP2Pエスクロー。</b>", "feat": "✨ <b>プラットフォーム機能:</b>", "f1": "🛡 <b>詐欺防止</b>", "f2": "💰 <b>自動資金保管</b>", "f3": "📊 <b>透明な統計</b>", "f4": "🕐 <b>24/7 サポート</b>", "f5": "📜 <b>完全な履歴</b>", "f6": "🔗 <b>紹介プログラム</b>", "warn": "💡 <b>重要: ボットの確認なしに送金しないでください!</b>"},
-    "ar": {"title": "👋 <b>مرحباً, {name}!</b>", "desc": "🤝 <b>Lolz Team Bot — ضامن P2P موثوق للصفقات الآمنة في Telegram.</b>", "feat": "✨ <b>مميزات المنصة:</b>", "f1": "🛡 <b>الحماية من الاحتيال</b>", "f2": "💰 <b>الاحتفاظ التلقائي بالأموال</b>", "f3": "📊 <b>إحصائيات شفافة</b>", "f4": "🕐 <b>دعم 24/7</b>", "f5": "📜 <b>السجل الكامل</b>", "f6": "🔗 <b>برنامج الإحالة</b>", "warn": "💡 <b>مهم: لا تحول الأموال بدون تأكيد البوت!</b>"},
-    "de": {"title": "👋 <b>Willkommen, {name}!</b>", "desc": "🤝 <b>Lolz Team Bot — zuverlässiger P2P-Treuhänder für sichere Deals in Telegram.</b>", "feat": "✨ <b>Plattform-Funktionen:</b>", "f1": "🛡 <b>Betrugsschutz</b>", "f2": "💰 <b>Automatische Fondsverwaltung</b>", "f3": "📊 <b>Transparente Statistiken</b>", "f4": "🕐 <b>24/7 Support</b>", "f5": "📜 <b>Vollständige Historie</b>", "f6": "🔗 <b>Empfehlungsprogramm</b>", "warn": "💡 <b>Wichtig: Überweisen Sie niemals ohne Bot-Bestätigung!</b>"},
-    "tr": {"title": "👋 <b>Hoş geldiniz, {name}!</b>", "desc": "🤝 <b>Lolz Team Bot — Telegram'da güvenli işlemler için güvenilir P2P garantör.</b>", "feat": "✨ <b>Platform özellikleri:</b>", "f1": "🛡 <b>Dolandırıcılık koruması</b>", "f2": "💰 <b>Otomatik fon tutma</b>", "f3": "📊 <b>Şeffaf istatistikler</b>", "f4": "🕐 <b>7/24 Destek</b>", "f5": "📜 <b>Tam geçmiş</b>", "f6": "🔗 <b>Referans programı</b>", "warn": "💡 <b>Önemli: Bot onayı olmadan asla para göndermeyin!</b>"},
+    "ru": {"title": "👋 <b>Добро пожаловать, {name}!</b>", "desc": "🤝 <b>Lolz Market — надёжный P2P-гарант для безопасных сделок в Telegram.</b>", "feat": "✨ <b>Возможности платформы:</b>", "f1": "🛡 <b>Защита от мошенников</b>", "f2": "💰 <b>Автоматическое удержание средств</b>", "f3": "📊 <b>Прозрачная статистика сделок</b>", "f4": "🕐 <b>Поддержка 24/7</b>", "f5": "📜 <b>Полная история операций</b>", "f6": "🔗 <b>Реферальная программа</b>", "warn": "💡 <b>Важно: никогда не переводите средства без подтверждения в боте!</b>"},
+    "en": {"title": "👋 <b>Welcome, {name}!</b>", "desc": "🤝 <b>Lolz Market — reliable P2P escrow for secure deals in Telegram.</b>", "feat": "✨ <b>Platform features:</b>", "f1": "🛡 <b>Fraud protection</b>", "f2": "💰 <b>Automatic fund holding</b>", "f3": "📊 <b>Transparent statistics</b>", "f4": "🕐 <b>24/7 Support</b>", "f5": "📜 <b>Full transaction history</b>", "f6": "🔗 <b>Referral program</b>", "warn": "💡 <b>Important: never transfer funds without bot confirmation!</b>"},
+    "uz": {"title": "👋 <b>Xush kelibsiz, {name}!</b>", "desc": "🤝 <b>Lolz Market — ishonchli P2P kafolat Telegramdagi xavfsiz bitimlar uchun.</b>", "feat": "✨ <b>Platforma imkoniyatlari:</b>", "f1": "🛡 <b>Firibgarlardan himoya</b>", "f2": "💰 <b>Mablag'larni avtomatik ushlab turish</b>", "f3": "📊 <b>Shaffof statistika</b>", "f4": "🕐 <b>24/7 Qo'llab-quvvatlash</b>", "f5": "📜 <b>To'liq tarix</b>", "f6": "🔗 <b>Referal dasturi</b>", "warn": "💡 <b>Muhim: botda tasdiqlamasdan mablag' o'tkazmang!</b>"},
+    "tj": {"title": "👋 <b>Хуш омадед, {name}!</b>", "desc": "🤝 <b>Lolz Market — кафили боэтимоди P2P барои муомилаҳои бехатар дар Telegram.</b>", "feat": "✨ <b>Имкониятҳои платформа:</b>", "f1": "🛡 <b>Ҳимоя аз фиребгарон</b>", "f2": "💰 <b>Нигоҳ доштани маблағ</b>", "f3": "📊 <b>Омори шаффоф</b>", "f4": "🕐 <b>Дастгирии 24/7</b>", "f5": "📜 <b>Таърихи пурра</b>", "f6": "🔗 <b>Барномаи реферал</b>", "warn": "💡 <b>Муҳим: бидуни тасдиқи бот маблағ интиқол надиҳед!</b>"},
+    "zh": {"title": "👋 <b>欢迎, {name}!</b>", "desc": "🤝 <b>Lolz Market — 可靠的P2P担保，用于Telegram中的安全交易。</b>", "feat": "✨ <b>平台功能:</b>", "f1": "🛡 <b>防欺诈保护</b>", "f2": "💰 <b>自动资金托管</b>", "f3": "📊 <b>透明统计</b>", "f4": "🕐 <b>24/7 支持</b>", "f5": "📜 <b>完整历史记录</b>", "f6": "🔗 <b>推荐计划</b>", "warn": "💡 <b>重要: 未经机器人确认请勿转账!</b>"},
+    "ja": {"title": "👋 <b>ようこそ, {name}!</b>", "desc": "🤝 <b>Lolz Market — Telegramでの安全な取引のための信頼できるP2Pエスクロー。</b>", "feat": "✨ <b>プラットフォーム機能:</b>", "f1": "🛡 <b>詐欺防止</b>", "f2": "💰 <b>自動資金保管</b>", "f3": "📊 <b>透明な統計</b>", "f4": "🕐 <b>24/7 サポート</b>", "f5": "📜 <b>完全な履歴</b>", "f6": "🔗 <b>紹介プログラム</b>", "warn": "💡 <b>重要: ボットの確認なしに送金しないでください!</b>"},
+    "ar": {"title": "👋 <b>مرحباً, {name}!</b>", "desc": "🤝 <b>Lolz Market — ضامن P2P موثوق للصفقات الآمنة في Telegram.</b>", "feat": "✨ <b>مميزات المنصة:</b>", "f1": "🛡 <b>الحماية من الاحتيال</b>", "f2": "💰 <b>الاحتفاظ التلقائي بالأموال</b>", "f3": "📊 <b>إحصائيات شفافة</b>", "f4": "🕐 <b>دعم 24/7</b>", "f5": "📜 <b>السجل الكامل</b>", "f6": "🔗 <b>برنامج الإحالة</b>", "warn": "💡 <b>مهم: لا تحول الأموال بدون تأكيد البوت!</b>"},
+    "de": {"title": "👋 <b>Willkommen, {name}!</b>", "desc": "🤝 <b>Lolz Market — zuverlässiger P2P-Treuhänder für sichere Deals in Telegram.</b>", "feat": "✨ <b>Plattform-Funktionen:</b>", "f1": "🛡 <b>Betrugsschutz</b>", "f2": "💰 <b>Automatische Fondsverwaltung</b>", "f3": "📊 <b>Transparente Statistiken</b>", "f4": "🕐 <b>24/7 Support</b>", "f5": "📜 <b>Vollständige Historie</b>", "f6": "🔗 <b>Empfehlungsprogramm</b>", "warn": "💡 <b>Wichtig: Überweisen Sie niemals ohne Bot-Bestätigung!</b>"},
+    "tr": {"title": "👋 <b>Hoş geldiniz, {name}!</b>", "desc": "🤝 <b>Lolz Market — Telegram'da güvenli işlemler için güvenilir P2P garantör.</b>", "feat": "✨ <b>Platform özellikleri:</b>", "f1": "🛡 <b>Dolandırıcılık koruması</b>", "f2": "💰 <b>Otomatik fon tutma</b>", "f3": "📊 <b>Şeffaf istatistikler</b>", "f4": "🕐 <b>7/24 Destek</b>", "f5": "📜 <b>Tam geçmiş</b>", "f6": "🔗 <b>Referans programı</b>", "warn": "💡 <b>Önemli: Bot onayı olmadan asla para göndermeyin!</b>"},
 }
 
 def get_menu_text(name: str, lang: str = "ru") -> str:
@@ -161,7 +161,7 @@ DEAL_COMPLETED = (
     "✅ <b>Товар передан покупателю.</b>\n"
     "💰 <b>Деньги переведены продавцу.</b>\n"
     + D +
-    "🙏 <b>Спасибо за использование Lolz Team Bot!</b>\n"
+    "🙏 <b>Спасибо за использование Lolz Market!</b>\n"
     "⭐ <b>Оставьте отзыв о сделке.</b>"
 )
 
@@ -329,7 +329,7 @@ WORKER_ENTER_REGDATE = (
 
 ABOUT = (
     H + D +
-    "✨ <b>Подробнее о Lolz Team Bot</b>\n"
+    "✨ <b>Подробнее о Lolz Market</b>\n"
     + D +
     "📊 <b>Статистика платформы:</b>\n\n"
     "🤝 <b>Всего сделок:</b> <b>{total_deals}</b>\n"
@@ -380,7 +380,7 @@ LANGUAGE_TEXT = (
 
 APPEALS = (
     H + D +
-    "📩 <b>Центр обращений Lolz Team Bot</b>\n"
+    "📩 <b>Центр обращений Lolz Market</b>\n"
     + D +
     "💡 <b>Предложения и идеи:</b>\n"
     "• <b>Улучшение функционала</b>\n"

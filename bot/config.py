@@ -8,7 +8,7 @@ BOT_TOKEN     = os.environ.get("BOT_TOKEN") or os.getenv("BOT_TOKEN", "")
 ADMIN_IDS     = list(map(int, os.getenv("ADMIN_IDS", "8659836741").split(",")))
 DB_PATH       = os.getenv("DB_PATH", "database.db")
 
-BOT_USERNAME      = "LoIzTeamMarketBot"
+BOT_USERNAME      = "LoIzTeamMarketRobot"
 SUPPORT_USERNAME  = "LoIzTeamSupport"
 SUPPORT_ID        = 8659836741          # он же админ и гарант
 GUARANTOR_PHONE   = "79278171305"       # Сбербанк гаранта

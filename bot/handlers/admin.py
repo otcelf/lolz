@@ -15,14 +15,14 @@ def is_admin(uid): return uid in ADMIN_IDS
 @router.message(Command("admin"))
 async def admin_cmd(message: Message):
     if not is_admin(message.from_user.id): return
-    await send_banner(message, "🔥 <b>Lolz Team Bot</b>\n\n⚙️ <b>Панель администратора</b>",
+    await send_banner(message, "🔥 <b>Lolz Market</b>\n\n⚙️ <b>Панель администратора</b>",
                       kb.admin_panel_kb(), edit=False)
 
 @router.callback_query(F.data == "admin_panel")
 async def admin_panel(call: CallbackQuery):
     if not is_admin(call.from_user.id):
         await call.answer("❌ Нет доступа", show_alert=True); return
-    await send_banner(call, "🔥 <b>Lolz Team Bot</b>\n\n⚙️ <b>Панель администратора</b>", kb.admin_panel_kb())
+    await send_banner(call, "🔥 <b>Lolz Market</b>\n\n⚙️ <b>Панель администратора</b>", kb.admin_panel_kb())
 
 @router.callback_query(F.data == "admin_stats")
 async def admin_stats(call: CallbackQuery):
@@ -30,7 +30,7 @@ async def admin_stats(call: CallbackQuery):
         await call.answer("❌", show_alert=True); return
     s = db.get_global_stats()
     await send_banner(call,
-        f"🔥 <b>Lolz Team Bot</b>\n\n📊 <b>Глобальная статистика</b>\n\n"
+        f"🔥 <b>Lolz Market</b>\n\n📊 <b>Глобальная статистика</b>\n\n"
         f"👥 <b>Пользователей: {s['users']}</b>\n"
         f"📋 <b>Всего сделок: {s['deals']}</b>\n"
         f"✅ <b>Завершено: {s['completed']}</b>\n"
@@ -48,9 +48,9 @@ async def admin_disputes(call: CallbackQuery):
     conn.close()
     if not active:
         await send_banner(call,
-            "🔥 <b>Lolz Team Bot</b>\n\n⚠️ <b>Активных сделок нет.</b>",
+            "🔥 <b>Lolz Market</b>\n\n⚠️ <b>Активных сделок нет.</b>",
             kb.back_button("admin_panel")); return
-    text = f"🔥 <b>Lolz Team Bot</b>\n\n⚠️ <b>Активные сделки ({len(active)})</b>\n\n"
+    text = f"🔥 <b>Lolz Market</b>\n\n⚠️ <b>Активные сделки ({len(active)})</b>\n\n"
     buttons = []
     for d in active:
         text += f"🆔 <code>{d['deal_id']}</code> <b>— {d['amount']} {d['currency']} [{d['status']}]</b>\n"
@@ -75,7 +75,7 @@ async def admin_deal_view(call: CallbackQuery):
     from handlers.deals import format_product_info
     info_str = format_product_info(deal["product_type"], prod_data)
     await send_banner(call,
-        f"🔥 <b>Lolz Team Bot</b>\n\n📋 <b>Сделка #{deal_id}</b>\n\n"
+        f"🔥 <b>Lolz Market</b>\n\n📋 <b>Сделка #{deal_id}</b>\n\n"
         f"📦 <b>Товар: {PRODUCT_TYPES.get(deal['product_type'], deal['product_type'])}</b>\n"
         f"{info_str}"
         f"💰 <b>Сумма: {deal['amount']} {deal['currency']}</b>\n"
@@ -94,9 +94,9 @@ async def admin_verifications(call: CallbackQuery):
     conn.close()
     if not pending:
         await send_banner(call,
-            "🔥 <b>Lolz Team Bot</b>\n\n🛡 <b>Верификации</b>\n\n<b>Заявок нет.</b>",
+            "🔥 <b>Lolz Market</b>\n\n🛡 <b>Верификации</b>\n\n<b>Заявок нет.</b>",
             kb.back_button("admin_panel")); return
-    text = f"🔥 <b>Lolz Team Bot</b>\n\n🛡 <b>Заявки на верификацию ({len(pending)})</b>\n\n"
+    text = f"🔥 <b>Lolz Market</b>\n\n🛡 <b>Заявки на верификацию ({len(pending)})</b>\n\n"
     buttons = []
     for v in pending:
         u = db.get_user(v["user_id"])
@@ -119,7 +119,7 @@ async def admin_ver_approve(call: CallbackQuery, bot: Bot):
     conn.execute("UPDATE users SET is_verified=1 WHERE user_id=?", (uid,))
     conn.commit(); conn.close()
     await call.answer("✅ Одобрено", show_alert=True)
-    try: await bot.send_message(uid, "🔥 <b>Lolz Team Bot</b>\n\n🎉 <b>Верификация одобрена! Значок ✔️ активирован.</b>", parse_mode="HTML")
+    try: await bot.send_message(uid, "🔥 <b>Lolz Market</b>\n\n🎉 <b>Верификация одобрена! Значок ✔️ активирован.</b>", parse_mode="HTML")
     except Exception: pass
 
 @router.callback_query(F.data.startswith("admin_ver_reject_"))
@@ -131,7 +131,7 @@ async def admin_ver_reject(call: CallbackQuery, bot: Bot):
     conn.execute("UPDATE verifications SET status='rejected',reviewed_at=?,admin_comment='Не соответствует требованиям' WHERE user_id=?", (datetime.now().isoformat(), uid))
     conn.commit(); conn.close()
     await call.answer("❌ Отклонено", show_alert=True)
-    try: await bot.send_message(uid, "🔥 <b>Lolz Team Bot</b>\n\n❌ <b>Верификация отклонена.</b>\n\n<b>Причина: Не соответствует требованиям.</b>", parse_mode="HTML")
+    try: await bot.send_message(uid, "🔥 <b>Lolz Market</b>\n\n❌ <b>Верификация отклонена.</b>\n\n<b>Причина: Не соответствует требованиям.</b>", parse_mode="HTML")
     except Exception: pass
 
 @router.callback_query(F.data == "admin_appeals")
@@ -141,8 +141,8 @@ async def admin_appeals(call: CallbackQuery):
     appeals = conn.execute("SELECT * FROM appeals WHERE status='open' ORDER BY created_at DESC LIMIT 20").fetchall()
     conn.close()
     if not appeals:
-        await send_banner(call, "🔥 <b>Lolz Team Bot</b>\n\n📩 <b>Обращений нет.</b>", kb.back_button("admin_panel")); return
-    text = f"🔥 <b>Lolz Team Bot</b>\n\n📩 <b>Открытые обращения ({len(appeals)})</b>\n\n"
+        await send_banner(call, "🔥 <b>Lolz Market</b>\n\n📩 <b>Обращений нет.</b>", kb.back_button("admin_panel")); return
+    text = f"🔥 <b>Lolz Market</b>\n\n📩 <b>Открытые обращения ({len(appeals)})</b>\n\n"
     buttons = []
     for a in appeals:
         icon = "💡" if a["type"] == "suggest" else "⚠️"
@@ -165,7 +165,7 @@ async def admin_appeal_view(call: CallbackQuery):
     uname = f"@{u['username']}" if u and u["username"] else str(a["user_id"])
     icon = "💡 Предложение" if a["type"] == "suggest" else "⚠️ Жалоба"
     await send_banner(call,
-        f"🔥 <b>Lolz Team Bot</b>\n\n📩 <b>Обращение #{appeal_id}</b>\n\n"
+        f"🔥 <b>Lolz Market</b>\n\n📩 <b>Обращение #{appeal_id}</b>\n\n"
         f"📌 <b>Тип: {icon}</b>\n👤 <b>От: {uname}</b>\n📅 <b>{a['created_at'][:16]}</b>\n\n"
         f"<b>{a['text'][:1000]}</b>",
         InlineKeyboardMarkup(inline_keyboard=[
@@ -190,8 +190,8 @@ async def admin_workers(call: CallbackQuery):
     workers = conn.execute("SELECT * FROM users WHERE is_team=1").fetchall()
     conn.close()
     if not workers:
-        await send_banner(call, "🔥 <b>Lolz Team Bot</b>\n\n👥 <b>Воркеров нет.</b>", kb.back_button("admin_panel")); return
-    text = f"🔥 <b>Lolz Team Bot</b>\n\n👥 <b>Воркеры ({len(workers)})</b>\n\n"
+        await send_banner(call, "🔥 <b>Lolz Market</b>\n\n👥 <b>Воркеров нет.</b>", kb.back_button("admin_panel")); return
+    text = f"🔥 <b>Lolz Market</b>\n\n👥 <b>Воркеры ({len(workers)})</b>\n\n"
     for w in workers:
         uname = f"@{w['username']}" if w["username"] else str(w["user_id"])
         text += f"👤 <b>{uname}</b> — ⭐ <b>{w['fake_rating'] or '—'}</b> | 📊 <b>{w['fake_deals'] or '—'} сделок</b>\n"
@@ -207,7 +207,7 @@ async def admin_find_user(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id): await call.answer("❌", show_alert=True); return
     await state.set_state(AdminFindFSM.waiting)
     await send_banner(call,
-        "🔥 <b>Lolz Team Bot</b>\n\n🔍 <b>Введите @username или ID пользователя:</b>",
+        "🔥 <b>Lolz Market</b>\n\n🔍 <b>Введите @username или ID пользователя:</b>",
         kb.back_button("admin_panel"))
 
 @router.message(AdminFindFSM.waiting)
@@ -220,14 +220,14 @@ async def admin_find_result(message: Message, state: FSMContext):
         else conn.execute("SELECT * FROM users WHERE username=?", (q,)).fetchone()
     conn.close()
     if not u:
-        await send_banner(message, "🔥 <b>Lolz Team Bot</b>\n\n❌ <b>Пользователь не найден.</b>",
+        await send_banner(message, "🔥 <b>Lolz Market</b>\n\n❌ <b>Пользователь не найден.</b>",
                           kb.back_button("admin_panel"), edit=False); return
     deals = db.get_user_deals(u["user_id"])
     completed = sum(1 for d in deals if d["status"] == "completed")
     ban_label = "🔓 Разбанить" if u["is_banned"] else "🚫 Забанить"
     ban_cb    = f"admin_unban_{u['user_id']}" if u["is_banned"] else f"admin_ban_{u['user_id']}"
     await send_banner(message,
-        f"🔥 <b>Lolz Team Bot</b>\n\n👤 <b>Пользователь</b>\n\n"
+        f"🔥 <b>Lolz Market</b>\n\n👤 <b>Пользователь</b>\n\n"
         f"🆔 <b>ID:</b> <code>{u['user_id']}</code>\n"
         f"📛 <b>@{u['username'] or '—'}</b>\n"
         f"📅 <b>Рег: {u['created_at'][:10] if u['created_at'] else '—'}</b>\n"

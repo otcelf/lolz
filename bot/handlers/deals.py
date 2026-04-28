@@ -85,7 +85,7 @@ async def _ask_field(target, field_info, ptype):
     field_key, prompt, _ = field_info
     ptype_label = PRODUCT_TYPES.get(ptype, ptype)
     text = (
-        f"🔥 <b>Lolz Team Bot</b>\n\n"
+        f"🔥 <b>Lolz Market</b>\n\n"
         f"📝 <b>Создание сделки — {ptype_label}</b>\n\n"
         f"{prompt}"
     )
@@ -107,7 +107,7 @@ async def collect_field(message: Message, state: FSMContext):
     # Валидация
     error = _validate_field(vtype, value)
     if error:
-        await send_banner(message, f"🔥 <b>Lolz Team Bot</b>\n\n{error}", kb.back_button(lang=lang), edit=False)
+        await send_banner(message, f"🔥 <b>Lolz Market</b>\n\n{error}", kb.back_button(lang=lang), edit=False)
         return
 
     prod_data[field_key] = value
@@ -170,7 +170,7 @@ async def deal_enter_amount(message: Message, state: FSMContext):
             raise ValueError
     except ValueError:
         await send_banner(message,
-            "🔥 <b>Lolz Team Bot</b>\n\n❌ <b>Введите корректную сумму (число больше 0).</b>",
+            "🔥 <b>Lolz Market</b>\n\n❌ <b>Введите корректную сумму (число больше 0).</b>",
             kb.back_button(lang=lang), edit=False)
         return
 
@@ -234,17 +234,17 @@ async def open_deal_for_buyer(message: Message, deal_id: str, bot: Bot):
     deal = db.get_deal(deal_id)
     if not deal:
         await send_banner(message,
-            "🔥 <b>Lolz Team Bot</b>\n\n❌ <b>Сделка не найдена или уже завершена.</b>",
+            "🔥 <b>Lolz Market</b>\n\n❌ <b>Сделка не найдена или уже завершена.</b>",
             kb.back_button(lang=lang), edit=False)
         return
     if deal["status"] not in ("pending",):
         await send_banner(message,
-            "🔥 <b>Lolz Team Bot</b>\n\n⚠️ <b>Эта сделка уже недоступна для оплаты.</b>",
+            "🔥 <b>Lolz Market</b>\n\n⚠️ <b>Эта сделка уже недоступна для оплаты.</b>",
             kb.back_button(lang=lang), edit=False)
         return
     if deal["seller_id"] == message.from_user.id:
         await send_banner(message,
-            "🔥 <b>Lolz Team Bot</b>\n\n❌ <b>Вы не можете купить собственный товар.</b>",
+            "🔥 <b>Lolz Market</b>\n\n❌ <b>Вы не можете купить собственный товар.</b>",
             kb.back_button(lang=lang), edit=False)
         return
 
@@ -499,7 +499,7 @@ async def my_deals(call: CallbackQuery):
     cancelled = sum(1 for d in deals if d["status"] == "cancelled")
 
     text = (
-        "🔥 <b>Lolz Team Bot</b>\n"
+        "🔥 <b>Lolz Market</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         "📋 <b>Мои сделки</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -538,7 +538,7 @@ async def deal_view(call: CallbackQuery):
     buyer_name  = (f"@{buyer['username']} (<code>{deal['buyer_id']}</code>)" if buyer and buyer["username"] else ("—" if not deal["buyer_id"] else f"<code>{deal['buyer_id']}</code>"))
 
     text = (
-        "🔥 <b>Lolz Team Bot</b>\n"
+        "🔥 <b>Lolz Market</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         f"📋 <b>Сделка</b> <b>#{deal['deal_id']}</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n\n"

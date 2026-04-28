@@ -56,7 +56,7 @@ async def worker_save_rating(message: Message, state: FSMContext):
             raise ValueError
     except ValueError:
         await send_banner(message,
-            "🔥 <b>Lolz Team Bot</b>\n\n❌ <b>Введите число от 1.0 до 5.0</b>",
+            "🔥 <b>Lolz Market</b>\n\n❌ <b>Введите число от 1.0 до 5.0</b>",
             kb.back_button("worker_menu", lang=lang), edit=False)
         return
     db.update_worker_profile(message.from_user.id, rating=val)
@@ -83,7 +83,7 @@ async def worker_save_deals(message: Message, state: FSMContext):
     lang = kb.get_lang(message.from_user.id)
     if not message.text.strip().isdigit():
         await send_banner(message,
-            "🔥 <b>Lolz Team Bot</b>\n\n❌ <b>Введите целое число!</b>",
+            "🔥 <b>Lolz Market</b>\n\n❌ <b>Введите целое число!</b>",
             kb.back_button("worker_menu", lang=lang), edit=False)
         return
     db.update_worker_profile(message.from_user.id, deals=int(message.text.strip()))
@@ -112,7 +112,7 @@ async def worker_save_regdate(message: Message, state: FSMContext):
     val = message.text.strip()
     if not re.match(r"^\d{2}\.\d{2}\.\d{4}$", val):
         await send_banner(message,
-            "🔥 <b>Lolz Team Bot</b>\n\n❌ <b>Неверный формат! Используйте ДД.ММ.ГГГГ</b>",
+            "🔥 <b>Lolz Market</b>\n\n❌ <b>Неверный формат! Используйте ДД.ММ.ГГГГ</b>",
             kb.back_button("worker_menu", lang=lang), edit=False)
         return
     db.update_worker_profile(message.from_user.id, reg_date=val)
