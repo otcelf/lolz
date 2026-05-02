@@ -255,3 +255,87 @@ async def admin_unban(call: CallbackQuery):
     uid = int(call.data.replace("admin_unban_", ""))
     conn = db.get_conn(); conn.execute("UPDATE users SET is_banned=0 WHERE user_id=?", (uid,)); conn.commit(); conn.close()
     await call.answer(f"✅ Разбанен", show_alert=True)
+
+# ── Рассылка ───────────────────────────────────────────
+
+class BroadcastFSM(StatesGroup):
+    waiting_message = State()
+
+@router.callback_query(F.data == "admin_broadcast")
+async def admin_broadcast_start(call: CallbackQuery, state: FSMContext):
+    if not is_admin(call.from_user.id):
+        await call.answer("❌ Нет доступа", show_alert=True); return
+    await state.set_state(BroadcastFSM.waiting_message)
+    await send_banner(call,
+        "🔥 <b>Lolz Market</b>\n\n"
+        "📢 <b>Рассылка</b>\n\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        "<b>Отправьте сообщение для рассылки.</b>\n\n"
+        "<b>Поддерживается:</b>\n"
+        "• <b>Текст (с форматированием)</b>\n"
+        "• <b>Фото с подписью</b>\n"
+        "• <b>Видео с подписью</b>\n\n"
+        "⚠️ <b>Сообщение будет отправлено ВСЕМ пользователям!</b>",
+        InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="❌ Отмена", callback_data="admin_panel")]
+        ])
+    )
+
+@router.message(BroadcastFSM.waiting_message)
+async def admin_broadcast_send(message: Message, state: FSMContext, bot: Bot):
+    if not is_admin(message.from_user.id): return
+    await state.clear()
+
+    # Получаем всех незабаненных пользователей
+    conn = db.get_conn()
+    users = conn.execute("SELECT user_id FROM users WHERE is_banned=0").fetchall()
+    conn.close()
+
+    total   = len(users)
+    success = 0
+    failed  = 0
+
+    # Уведомляем что рассылка началась
+    status_msg = await message.answer(
+        f"🔥 <b>Lolz Market</b>\n\n"
+        f"📢 <b>Рассылка запущена...</b>\n\n"
+        f"👥 <b>Всего пользователей: {total}</b>\n"
+        f"⏳ <b>Отправляем...</b>",
+        parse_mode="HTML"
+    )
+
+    for user in users:
+        try:
+            uid = user["user_id"]
+            # Копируем сообщение пользователю (поддерживает любой тип)
+            await message.copy_to(uid)
+            success += 1
+        except Exception:
+            failed += 1
+
+        # Обновляем статус каждые 50 отправок
+        if (success + failed) % 50 == 0:
+            try:
+                await status_msg.edit_text(
+                    f"🔥 <b>Lolz Market</b>\n\n"
+                    f"📢 <b>Рассылка в процессе...</b>\n\n"
+                    f"✅ <b>Отправлено: {success}</b>\n"
+                    f"❌ <b>Ошибок: {failed}</b>\n"
+                    f"👥 <b>Всего: {total}</b>",
+                    parse_mode="HTML"
+                )
+            except Exception:
+                pass
+
+    # Финальный отчёт
+    await status_msg.edit_text(
+        f"🔥 <b>Lolz Market</b>\n\n"
+        f"📢 <b>Рассылка завершена!</b>\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"✅ <b>Успешно отправлено: {success}</b>\n"
+        f"❌ <b>Не доставлено: {failed}</b>\n"
+        f"👥 <b>Всего пользователей: {total}</b>\n"
+        f"📊 <b>Охват: {round(success/total*100, 1) if total else 0}%</b>",
+        parse_mode="HTML",
+        reply_markup=kb.admin_panel_kb()
+    )

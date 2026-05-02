@@ -477,5 +477,6 @@ def admin_panel_kb():
         [btn("📊 Статистика", "admin_stats"),         btn("⚠️ Споры/сделки", "admin_disputes")],
         [btn("🛡 Верификации", "admin_verifications"), btn("🔍 Найти юзера", "admin_find_user")],
         [btn("📩 Обращения", "admin_appeals"),         btn("👥 Воркеры", "admin_workers")],
+        [btn("📢 Рассылка", "admin_broadcast")],
         [btn("◀️ Назад в меню", "back_main")],
     )
