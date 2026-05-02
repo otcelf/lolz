@@ -299,10 +299,21 @@ async def admin_broadcast_send(message: Message, state: FSMContext, bot: Bot):
     status_msg = await message.answer(
         f"🔥 <b>Lolz Market</b>\n\n"
         f"📢 <b>Рассылка запущена...</b>\n\n"
-        f"👥 <b>Всего пользователей: {total}</b>\n"
+        f"👥 <b>Всего пользователей в БД: {total}</b>\n"
         f"⏳ <b>Отправляем...</b>",
         parse_mode="HTML"
     )
+
+    if total == 0:
+        await status_msg.edit_text(
+            "🔥 <b>Lolz Market</b>\n\n"
+            "📢 <b>Рассылка</b>\n\n"
+            "⚠️ <b>В базе данных нет пользователей!</b>\n\n"
+            "<b>Пользователи появятся после того как они напишут боту /start.</b>",
+            parse_mode="HTML",
+            reply_markup=kb.admin_panel_kb()
+        )
+        return
 
     for user in users:
         try:
